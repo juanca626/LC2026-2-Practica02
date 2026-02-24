@@ -31,7 +31,15 @@ type Estado = [String]
 
 --Ejercicio 1
 variables :: Prop -> [String]
-variables = undefined
+variables f = eliminarDuplicados (vars f)
+    where
+        vars (Cons _) = []
+        vars (Var p) = [p]
+        vars (Not p) = vars p 
+        vars (And p q) = vars p ++ vars q
+        vars (Or p q) = vars p ++ vars q
+        vars (Impl p q) = vars p ++ vars q
+        vars (Syss p q) = vars p ++ vars q
 
 --Ejercicio 2
 interpretacion :: Prop -> Estado -> Bool
@@ -63,6 +71,10 @@ consecuenciaLogica = undefined
 
 
 --Funcion auxiliar
+eliminarDuplicados :: Eq a => [a] -> [a]
+eliminarDuplicados [] = []
+eliminarDuplicados (x:xs) = x : eliminarDuplicados (filter (/= x) xs)
+
 conjPotencia :: [a] -> [[a]]
 conjPotencia [] = [[]]
 conjPotencia (x:xs) = [(x:ys) | ys <- conjPotencia xs] ++ conjPotencia xs
