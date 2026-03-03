@@ -43,38 +43,65 @@ variables f = eliminarDuplicados (vars f)
 
 --Ejercicio 2
 interpretacion :: Prop -> Estado -> Bool
-interpretacion = undefined
+interpretacion (Cons b) _ = b
+interpretacion (Var var) e = contiene var e
+interpretacion (Not prop) e = not (interpretacion prop e)
+interpretacion (And p1 p2) e = interpretacion p1 e && interpretacion p2 e
+interpretacion (Or p1 p2) e = interpretacion p1 e || interpretacion p2 e
+interpretacion (Impl p1 p2) e = not (interpretacion p1 e) || interpretacion p2 e
+interpretacion (Syss p1 p2) e = interpretacion p1 e == interpretacion p2 e
 
 --Ejercicio 3
 estadosPosibles :: Prop -> [Estado]
-estadosPosibles = undefined
+estadosPosibles f = conjuntoPotencia (variables f)
 
 --Ejercicio 4
 modelos :: Prop -> [Estado]
-modelos = undefined
+modelos f = [e | e <- estadosPosibles f, interpretacion f e]
 
 --Ejercicio 5
 sonEquivalentes :: Prop -> Prop -> Bool
-sonEquivalentes = undefined
+sonEquivalentes f1 f2 = 
+    let variablesUnidas = eliminarDuplicados (variables f1 ++ variables f2)
+        estados = conjuntoPotencia variablesUnidas
+    in todos (\e -> interpretacion f1 e == interpretacion f2 e) estados
 
 --Ejercicio 6 
 tautologia :: Prop -> Bool
-tautologia = undefined
+tautologia f = todos (\e -> interpretacion f e) (estadosPosibles f)
 
 --Ejercicio 7
 contradiccion :: Prop -> Bool
-contradiccion = undefined
+contradiccion f = not (alguno (\e -> interpretacion f e) (estadosPosibles f))
 
 --Ejercicio 8
 consecuenciaLogica :: [Prop] -> Prop -> Bool
 consecuenciaLogica = undefined
 
 
---Funcion auxiliar
+--Funciones auxiliar
+
+--Checa si hay un elemento en la lista
+contiene :: Eq a => a -> [a] -> Bool
+contiene _ [] = False
+contiene x (y:ys) = x == y || contiene x ys
+
+--Pos elimina duplicados :v
 eliminarDuplicados :: Eq a => [a] -> [a]
 eliminarDuplicados [] = []
 eliminarDuplicados (x:xs) = x : eliminarDuplicados (filter (/= x) xs)
 
-conjPotencia :: [a] -> [[a]]
-conjPotencia [] = [[]]
-conjPotencia (x:xs) = [(x:ys) | ys <- conjPotencia xs] ++ conjPotencia xs
+--Ayuda a conseguir los posibles estados de las variables
+conjuntoPotencia :: [a] -> [[a]]
+conjuntoPotencia [] = [[]]
+conjuntoPotencia (x:xs) = [(x:ys) | ys <- conjuntoPotencia xs] ++ conjuntoPotencia xs
+
+--Verifica si los elementos de una lista cumplen con la proposicion
+todos :: (a -> Bool) -> [a] -> Bool
+todos _ [] = True
+todos proposicion (x:xs) = proposicion x && todos proposicion xs
+
+--Lo mismo que arriba pero solo con uno
+alguno :: (a -> Bool) -> [a] -> Bool
+alguno _ [] = False
+alguno proposicion (x:xs) = proposicion x || alguno proposicion xs
