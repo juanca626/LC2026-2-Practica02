@@ -1,3 +1,4 @@
+--Probado en la version 4.18.2.1 de cabal
 module Practica02 where
 
 --Sintaxis de la logica proposicional
@@ -76,7 +77,9 @@ contradiccion f = not (alguno (\e -> interpretacion f e) (estadosPosibles f))
 
 --Ejercicio 8
 consecuenciaLogica :: [Prop] -> Prop -> Bool
-consecuenciaLogica = undefined
+consecuenciaLogica [] conclusion = tautologia conclusion
+consecuenciaLogica premisas conclusion =
+    tautologia (Impl (foldr1 And premisas) conclusion)
 
 
 --Funciones auxiliar
@@ -89,7 +92,10 @@ contiene x (y:ys) = x == y || contiene x ys
 --Pos elimina duplicados :v
 eliminarDuplicados :: Eq a => [a] -> [a]
 eliminarDuplicados [] = []
-eliminarDuplicados (x:xs) = x : eliminarDuplicados (filter (/= x) xs)
+eliminarDuplicados (x:xs) = 
+    if contiene x xs 
+    then eliminarDuplicados xs 
+    else x : eliminarDuplicados xs
 
 --Ayuda a conseguir los posibles estados de las variables
 conjuntoPotencia :: [a] -> [[a]]
